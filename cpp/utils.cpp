@@ -16,7 +16,7 @@ double entropy(const std::vector<double>& prob_vec) {
   return -1.0 * ent;
 }
 
-std::vector<std::string> load_words() {
+std::vector<std::string> load_guess_words() {
   std::ifstream in("sowpods.txt");
   std::string str;
   std::vector<std::string> words;
@@ -27,6 +27,20 @@ std::vector<std::string> load_words() {
   }
   return words;
 }
+
+std::vector<std::string> load_sol_words() {
+  std::ifstream in("solutions.txt");
+  std::string str;
+  std::vector<std::string> words;
+  while (std::getline(in, str)) {
+    if (str.size() == 5) {
+      words.push_back(str);
+    }
+  }
+  return words;
+}
+
+
 
 std::vector<std::string> load_words_test_small() {
   return {
@@ -108,20 +122,20 @@ double calc_entropy_for_word(std::string query, const std::vector<std::string>& 
   return entropy(counts);
 }
 
-std::pair<std::string, double> get_best_word(const std::vector<std::string>& words, const std::vector<int>& constrained_word_idxs, bool use_cache) {
+std::pair<std::string, double> get_best_word(const std::vector<std::string>& guess_words, const std::vector<int>& constrained_guess_idxs, const std::vector<std::string>& sol_words, const std::vector<int>& constrained_sol_idxs, bool use_cache) {
   std::map<std::string, double> entrop_dict = {};
   if (use_cache) {
     entrop_dict = load_checkpoint();
   }
 
   int count = 0;
-  for (const auto idx : constrained_word_idxs) {
-    const auto& query = words.at(idx);
+  for (const auto idx : constrained_guess_idxs) {
+    const auto& query = guess_words.at(idx);
     if (entrop_dict.find(query) != entrop_dict.end()) {
       count++;
       continue;
     }
-    entrop_dict[query] = calc_entropy_for_word(query, words, constrained_word_idxs);
+    entrop_dict[query] = calc_entropy_for_word(query, sol_words, constrained_sol_idxs);
     count++;
     // std::cout << query << " has entropy: " << entrop_dict[query] << std::endl;
     if (use_cache && count % 20 == 0) {

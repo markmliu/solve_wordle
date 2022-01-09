@@ -30,13 +30,18 @@ std::vector<std::function<bool(const std::string&)>> parse_constraints_string(co
 
 int main() {
   // get list of words
-  std::vector<std::string> words = load_words();
-  std::cout << "number of five letter words: " << words.size() << std::endl;
+  std::vector<std::string> guess_words = load_guess_words();
+  std::vector<std::string> sol_words = load_sol_words();
+  std::cout << "number of five letter guess words: " << guess_words.size() << std::endl;
 
-  std::vector<int> constrained_word_idxs(words.size());
-  std::iota(std::begin(constrained_word_idxs), std::end(constrained_word_idxs), 0);
+  std::vector<int> constrained_guess_idxs(guess_words.size());
+  std::iota(std::begin(constrained_guess_idxs), std::end(constrained_guess_idxs), 0);
 
-  auto [guess,ent] = get_best_word(words, constrained_word_idxs,/*use_cache=*/true);
+  std::vector<int> constrained_sol_idxs(sol_words.size());
+  std::iota(std::begin(constrained_sol_idxs), std::end(constrained_sol_idxs), 0);
+
+
+  auto [guess,ent] = get_best_word(guess_words, constrained_guess_idxs, sol_words, constrained_sol_idxs, /*use_cache=*/true);
   std::cout << guess << " has highest entropy of " << ent << std::endl;
 
   std::string constraints_string;
@@ -47,29 +52,51 @@ int main() {
     std::vector<std::function<bool(const std::string&)>> new_constraints = parse_constraints_string(constraints_string);
     constraints.insert(constraints.end(), new_constraints.begin(), new_constraints.end());
     // recompute constrained_word_idxs
-    std::vector<int> temp;
-    for (const int idx : constrained_word_idxs) {
-      bool failed_constraint = false;
-      const auto& word = words.at(idx);
-      for (const auto& constraint : constraints) {
-	if (!constraint(word)) {
-	  failed_constraint = true;
-	  break;
+    {
+      std::vector<int> temp;
+      for (const int idx : constrained_guess_idxs) {
+	bool failed_constraint = false;
+	const auto& guess = guess_words.at(idx);
+	for (const auto& constraint : constraints) {
+	  if (!constraint(guess)) {
+	    failed_constraint = true;
+	    break;
+	  }
+	}
+	if (!failed_constraint) {
+	  temp.push_back(idx);
 	}
       }
-      if (!failed_constraint) {
-	temp.push_back(idx);
-      }
+      constrained_guess_idxs = temp;
     }
-    constrained_word_idxs = temp;
-    if (constrained_word_idxs.size() == 1) {
-      std::cout << "found only one choice: " << words.at(constrained_word_idxs.at(0)) << std::endl;
+
+    // do the same for sols
+    {
+      std::vector<int> temp;
+      for (const int idx : constrained_sol_idxs) {
+	bool failed_constraint = false;
+	const auto& sol = sol_words.at(idx);
+	for (const auto& constraint : constraints) {
+	  if (!constraint(sol)) {
+	    failed_constraint = true;
+	    break;
+	  }
+	}
+	if (!failed_constraint) {
+	  temp.push_back(idx);
+	}
+      }
+      constrained_sol_idxs = temp;
+    }
+
+    if (constrained_sol_idxs.size() == 1) {
+      std::cout << "found only one choice: " << sol_words.at(constrained_sol_idxs.at(0)) << std::endl;
       return 0;
-    } else if (constrained_word_idxs.size() == 0) {
+    } else if (constrained_sol_idxs.size() == 0) {
       std::cout << "no words found matching all constraints. either a bug or vocab isn't big enough" << std::endl;
       return 0;
     }
-    auto [next_guess, ent] = get_best_word(words, constrained_word_idxs, /*use_cache=*/false);
+    auto [next_guess, ent] = get_best_word(guess_words, constrained_guess_idxs, sol_words, constrained_sol_idxs, /*use_cache=*/false);
     std::cout << "let's guess: " << next_guess << " which has entropy: " << ent << std::endl;
   }
 }
