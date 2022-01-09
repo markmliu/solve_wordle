@@ -1,6 +1,7 @@
 #include "matplotlibcpp.h"
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 namespace plt = matplotlibcpp;
 
@@ -25,12 +26,20 @@ int main() {
   std::map<std::string, double> entrop_dict = load_checkpoint();
   // dump to a vector
   std::vector<double> entrops;
+  std::vector<std::pair<std::string, double>> high_entrops;
   for (const auto& kv : entrop_dict) {
     entrops.push_back(kv.second);
-    if (kv.second > 6.0) {
-      std::cout << kv.first << " " << kv.second << std::endl;
+    if (kv.second > 5.8) {
+      high_entrops.push_back(kv);
     }
   }
+
+  std::sort(high_entrops.begin(), high_entrops.end(), [](const std::pair<std::string, double>& a, const std::pair<std::string, double>& b) { return a.second > b.second; });
+
+  for (const auto& kv : high_entrops) {
+    std::cout << kv.first << " " << kv.second << std::endl;
+  }
+
 
   plt::hist(entrops);
   // plt::show();
