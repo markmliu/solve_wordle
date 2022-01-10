@@ -155,7 +155,7 @@ std::pair<std::string, double> get_best_word(const std::vector<std::string>& gue
 }
 
 // like calc_entropy_for_word but actually returns the partitions of words
-std::vector<std::vector<int>> partition_answer_space_for_word(std::string query, const std::vector<std::string>& all_words, const std::vector<int>& remaining_words) {
+std::vector<std::vector<int>> partition_space_for_word(std::string query, const std::vector<std::string>& all_words, const std::vector<int>& remaining_words) {
   std::vector<std::function<bool(const std::string&, const char, int)>> fs;
 
   // has_letter_at_pos
