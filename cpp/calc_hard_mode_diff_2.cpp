@@ -27,12 +27,19 @@ int main() {
 
   int total_counts = 0;
   double total_advantage = 0.0;
+  int num_partitions_advantage = 0;
+  int num_solutions_advantage = 0;
   for (const auto& [count,diff] : diffs) {
     // std::cout << "count: " << count << " diff: " << diff << std::endl;
     total_counts += count;
     total_advantage += (count * diff);
+    if (diff > 0.001) {
+      num_partitions_advantage++;
+      num_solutions_advantage+= count;
+    }
   }
   assert(total_counts == solution_list.size());
   total_advantage /= (solution_list.size());
   std::cout << "total advantage: " << total_advantage << std::endl;
+  std::cout << "number of solution words that have diff: " << num_solutions_advantage << " out of " << total_counts << std::endl;
 }
