@@ -103,6 +103,7 @@ double calc_entropy_for_word(std::string query, const std::vector<std::string>& 
   fs.push_back(has_letter_not_at_pos);
   fs.push_back(does_not_have_letter);
 
+  // TODO: this next section is the most wasteful - the inner loop can be the outer loop and we don't have to repeat it 243 times.
   std::vector<double> counts;
   for (const auto& [f0,f1,f2,f3,f4] : iter::product(fs,fs,fs,fs,fs)) {
     int count = 0;
@@ -136,6 +137,7 @@ std::pair<std::string, double> get_best_word(const std::vector<std::string>& gue
       continue;
     }
     entrop_dict[query] = calc_entropy_for_word(query, sol_words, constrained_sol_idxs);
+    // std::cout << "entropy for " << query << " is " << entrop_dict.at(query) << std::endl;
     count++;
     // std::cout << query << " has entropy: " << entrop_dict[query] << std::endl;
     if (use_cache && count % 20 == 0) {

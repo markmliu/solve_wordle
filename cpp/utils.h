@@ -27,6 +27,7 @@ bool does_not_have_letter(const std::string& word, const char letter, int pos);
 // given the query word and the list of possible solutions, return the entropy.
 double calc_entropy_for_word(std::string query, const std::vector<std::string>& all_solutions, const std::vector<int>& constrained_solution_idxs);
 
+// return the best guess word along with its entropy.
 std::pair<std::string, double> get_best_word(const std::vector<std::string>& guess_words, const std::vector<int>& constrained_guess_idxs, const std::vector<std::string>& solution_words, const std::vector<int>& constrained_solution_idx, bool use_cache);
 
 // like calc_entropy_for_word but actually returns the partitions of words
